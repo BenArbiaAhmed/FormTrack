@@ -6,44 +6,43 @@ from mediapipe.framework.formats import landmark_pb2
 import numpy as np
 import cv2
 
-def draw_landmarks_on_image(rgb_image, detection_result):
-  pose_landmarks_list = detection_result.pose_landmarks
-  annotated_image = np.copy(rgb_image)
 
-  # Loop through the detected poses to visualize.
-  for idx in range(len(pose_landmarks_list)):
-    pose_landmarks = pose_landmarks_list[idx]
+class PoseDetector:
 
-    # Draw the pose landmarks.
-    pose_landmarks_proto = landmark_pb2.NormalizedLandmarkList()
-    pose_landmarks_proto.landmark.extend([
-      landmark_pb2.NormalizedLandmark(x=landmark.x, y=landmark.y, z=landmark.z) for landmark in pose_landmarks
-    ])
-    solutions.drawing_utils.draw_landmarks(
-      annotated_image,
-      pose_landmarks_proto,
-      solutions.pose.POSE_CONNECTIONS,
-      solutions.drawing_styles.get_default_pose_landmarks_style())
-  return annotated_image
+  def __init__(self, modelPath):
+    self.BaseOptions = mp.tasks.BaseOptions
+    self.PoseLandmarker = mp.tasks.vision.PoseLandmarker
+    self.PoseLandmarkerOptions = mp.tasks.vision.PoseLandmarkerOptions
+    self.VisionRunningMode = mp.tasks.vision.RunningMode
+    self.model_path = modelPath
+    self.options = self.PoseLandmarkerOptions(
+    base_options=self.BaseOptions(model_asset_path=self.model_path),
+    running_mode=self.VisionRunningMode.IMAGE)
+    self.detector = vision.PoseLandmarker.create_from_options(self.options)
 
-model_path = 'model/pose_landmarker_full.task'
+  def draw_landmarks_on_image(self, rgb_image, detection_result):
+    pose_landmarks_list = detection_result.pose_landmarks
+    annotated_image = np.copy(rgb_image)
 
-BaseOptions = mp.tasks.BaseOptions
-PoseLandmarker = mp.tasks.vision.PoseLandmarker
-PoseLandmarkerOptions = mp.tasks.vision.PoseLandmarkerOptions
-VisionRunningMode = mp.tasks.vision.RunningMode
+    # Loop through the detected poses to visualize.
+    for idx in range(len(pose_landmarks_list)):
+      pose_landmarks = pose_landmarks_list[idx]
 
-options = PoseLandmarkerOptions(
-    base_options=BaseOptions(model_asset_path=model_path),
-    running_mode=VisionRunningMode.IMAGE)
+      # Draw the pose landmarks.
+      pose_landmarks_proto = landmark_pb2.NormalizedLandmarkList()
+      pose_landmarks_proto.landmark.extend([
+        landmark_pb2.NormalizedLandmark(x=landmark.x, y=landmark.y, z=landmark.z) for landmark in pose_landmarks
+      ])
+      solutions.drawing_utils.draw_landmarks(
+        annotated_image,
+        pose_landmarks_proto,
+        solutions.pose.POSE_CONNECTIONS,
+        solutions.drawing_styles.get_default_pose_landmarks_style())
+    return annotated_image
 
-detector = vision.PoseLandmarker.create_from_options(options)
-image = mp.Image.create_from_file("relative/path/to/image")
-detection_result = detector.detect(image)
-annotated_image = draw_landmarks_on_image(image.numpy_view(), detection_result)
-annotated_image_bgr = cv2.cvtColor(annotated_image, cv2.COLOR_RGB2BGR)
-cv2.imshow("Displayed Image", annotated_image_bgr)
-
-
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+  def detect_landmarks(self, data):
+      image = mp.Image(image_format=mp.ImageFormat.SRGB, data=data)
+      detection_result = self.detector.detect(image)
+      annotated_image = self.draw_landmarks_on_image(image.numpy_view(), detection_result)
+      annotated_image_bgr = cv2.cvtColor(annotated_image, cv2.COLOR_RGB2BGR)
+      return annotated_image_bgr
