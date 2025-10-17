@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 from pose_detector import PoseDetector
-from utils.landmarks_utils import get_landmarks_dict
+from utils.landmarks_utils import get_landmarks_dict, calculate_joint_angle
 
 cap = cv2.VideoCapture(0)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
@@ -31,7 +31,6 @@ while True:
     if landmarks.pose_world_landmarks:
         pose_world_landmarks = landmarks.pose_world_landmarks[0]
         landmarks_dict = get_landmarks_dict(pose_world_landmarks)
-    
     cv2.imshow('frame', image_with_landmarks)
     
     frame_count += 1
