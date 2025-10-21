@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 def get_landmarks_dict(pose_world_landmarks, visibility_threshold=0.5):
     landmarks = {}
@@ -28,17 +29,10 @@ def get_landmarks_dict(pose_world_landmarks, visibility_threshold=0.5):
 
 
 def calculate_joint_angle(point1, point2, point3):
-    import math
-    
-    vector1 = [point1.x - point2.x, point1.y - point2.y, point1.z - point2.z]
-    vector2 = [point3.x - point2.x, point3.y - point2.y, point3.z - point2.z]
-    
-    dot_product = sum(a * b for a, b in zip(vector1, vector2))
-    magnitude1 = math.sqrt(sum(a ** 2 for a in vector1))
-    magnitude2 = math.sqrt(sum(a ** 2 for a in vector2))
-    
-    angle_radians = math.acos(dot_product / (magnitude1 * magnitude2))
+
+    angle1 = math.atan2(point1.y - point2.y, point1.x - point2.x)
+    angle2 = math.atan2(point3.y - point2.y, point3.x - point2.x)
+    angle_radians = angle2 - angle1
+    angle_radians = math.atan2(math.sin(angle_radians), math.cos(angle_radians))
     angle_degrees = math.degrees(angle_radians)
-    
-    
-    return angle_degrees
+    return abs(angle_degrees)

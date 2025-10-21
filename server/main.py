@@ -31,6 +31,9 @@ while True:
     if landmarks.pose_world_landmarks:
         pose_world_landmarks = landmarks.pose_world_landmarks[0]
         landmarks_dict = get_landmarks_dict(pose_world_landmarks)
+
+    if landmarks_dict.get('right_shoulder') and landmarks_dict.get('right_elbow') and landmarks_dict.get('right_wrist'):
+        print("Angle: ", calculate_joint_angle(landmarks_dict['right_shoulder'], landmarks_dict['right_elbow'], landmarks_dict['right_wrist']))
     cv2.imshow('frame', image_with_landmarks)
     
     frame_count += 1
