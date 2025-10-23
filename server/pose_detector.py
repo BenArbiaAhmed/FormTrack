@@ -9,7 +9,7 @@ import cv2
 
 class PoseDetector:
 
-  def __init__(self, modelPath, use_tracking=False):
+  def __init__(self, modelPath, use_tracking=True):
     self.BaseOptions = mp.tasks.BaseOptions
     self.PoseLandmarker = mp.tasks.vision.PoseLandmarker
     self.PoseLandmarkerOptions = mp.tasks.vision.PoseLandmarkerOptions
@@ -21,9 +21,9 @@ class PoseDetector:
     self.options = self.PoseLandmarkerOptions(
         base_options=self.BaseOptions(model_asset_path=self.model_path),
         running_mode=running_mode,  
-        min_pose_detection_confidence=0.5,  
-        min_pose_presence_confidence=0.5,   
-        # min_tracking_confidence=0.5        
+        min_pose_detection_confidence=0.7,  
+        min_pose_presence_confidence=0.7,   
+        min_tracking_confidence=0.7        
     )
     self.detector = vision.PoseLandmarker.create_from_options(self.options)
 
@@ -49,7 +49,12 @@ class PoseDetector:
 
   def detect_landmarks(self, data, timestamp_ms=None):
       image = mp.Image(image_format=mp.ImageFormat.SRGB, data=data)
-      detection_result = self.detector.detect(image)
+      if self.use_tracking:
+        if timestamp_ms is None:
+            raise ValueError("timestamp_ms is required when use_tracking=True")
+        detection_result = self.detector.detect_for_video(image, timestamp_ms)
+      else:
+          detection_result = self.detector.detect(image)
       annotated_image = self.draw_landmarks_on_image(image.numpy_view(), detection_result)
       annotated_image_bgr = cv2.cvtColor(annotated_image, cv2.COLOR_RGB2BGR)
       return annotated_image_bgr, detection_result
