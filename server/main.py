@@ -4,6 +4,7 @@ from pose_detector import PoseDetector
 from utils.landmarks_utils import get_landmarks_dict, calculate_joint_angle
 from exercises.squat import Squat
 from exercises.pushup import Pushup
+from exercises.tricep_dips import TricepDips
 
 
 cap = cv2.VideoCapture(0)
@@ -21,6 +22,7 @@ if fps == 0:
 
 squat = Squat()
 pushup = Pushup()
+tricep_dips = TricepDips()
 while True:
     ret, frame = cap.read()
     
@@ -29,8 +31,8 @@ while True:
         break
 
     landmarks_dict = {}
-    right_knee = None
-    left_knee = None
+    right_elbow = None
+    left_elbow = None
 
     timestamp_ms = int(frame_count * 1000 / fps)
     rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -42,30 +44,12 @@ while True:
         pose_world_landmarks = landmarks.pose_world_landmarks[0]
         landmarks_dict = get_landmarks_dict(pose_world_landmarks)
 
-    if landmarks_dict.get('right_hip') and landmarks_dict.get('right_knee') and landmarks_dict.get('right_ankle'):
-        right_knee = calculate_joint_angle(landmarks_dict['right_hip'], landmarks_dict['right_knee'], landmarks_dict['right_ankle'])
-    if landmarks_dict.get('left_hip') and landmarks_dict.get('left_knee') and landmarks_dict.get('left_ankle'):
-        left_knee = calculate_joint_angle(landmarks_dict['left_hip'], landmarks_dict['left_knee'], landmarks_dict['left_ankle'])
-    if(right_knee is not None and left_knee is not None):
-        rep_count, current_phase = squat.update({'right_knee': right_knee, 'left_knee': left_knee})
-        cv2.putText(image_with_landmarks, f'Phase: {current_phase}', 
-                    (50, 180),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    1.5,
-                    (255, 255, 0),  # Cyan
-                    2,
-                    cv2.LINE_AA)
-    print(squat.phase_history)
-    # if landmarks_dict.get('right_elbow') and landmarks_dict.get('right_shoulder') and landmarks_dict.get('right_wrist'):
-    #     right_elbow = calculate_joint_angle(landmarks_dict['right_shoulder'], landmarks_dict['right_elbow'], landmarks_dict['right_wrist'])
-    # else:
-    #     print("landmark missing")
-    # if landmarks_dict.get('left_elbow') and landmarks_dict.get('left_shoulder') and landmarks_dict.get('left_wrist'):
-    #     left_elbow = calculate_joint_angle(landmarks_dict['left_shoulder'], landmarks_dict['left_elbow'], landmarks_dict['left_wrist'])
-    # else:
-    #     print("landmark missing")
-    # if(right_elbow is not None and left_elbow is not None):
-    #     rep_count, current_phase = pushup.update({'right_elbow': right_elbow, 'left_elbow': left_elbow})
+    # if landmarks_dict.get('right_hip') and landmarks_dict.get('right_knee') and landmarks_dict.get('right_ankle'):
+    #     right_knee = calculate_joint_angle(landmarks_dict['right_hip'], landmarks_dict['right_knee'], landmarks_dict['right_ankle'])
+    # if landmarks_dict.get('left_hip') and landmarks_dict.get('left_knee') and landmarks_dict.get('left_ankle'):
+    #     left_knee = calculate_joint_angle(landmarks_dict['left_hip'], landmarks_dict['left_knee'], landmarks_dict['left_ankle'])
+    # if(right_knee is not None and left_knee is not None):
+    #     rep_count, current_phase = squat.update({'right_knee': right_knee, 'left_knee': left_knee})
     #     cv2.putText(image_with_landmarks, f'Phase: {current_phase}', 
     #                 (50, 180),
     #                 cv2.FONT_HERSHEY_SIMPLEX,
@@ -73,10 +57,28 @@ while True:
     #                 (255, 255, 0),  # Cyan
     #                 2,
     #                 cv2.LINE_AA)
-    # else:
-    #     print("angles missing")
-    # print(pushup.phase_history)
-    cv2.putText(image_with_landmarks, f'Reps: {squat.rep_count}', 
+    # print(squat.phase_history)
+    if landmarks_dict.get('right_elbow') and landmarks_dict.get('right_shoulder') and landmarks_dict.get('right_wrist'):
+        right_elbow = calculate_joint_angle(landmarks_dict['right_shoulder'], landmarks_dict['right_elbow'], landmarks_dict['right_wrist'])
+    else:
+        print("landmark missing")
+    if landmarks_dict.get('left_elbow') and landmarks_dict.get('left_shoulder') and landmarks_dict.get('left_wrist'):
+        left_elbow = calculate_joint_angle(landmarks_dict['left_shoulder'], landmarks_dict['left_elbow'], landmarks_dict['left_wrist'])
+    else:
+        print("landmark missing")
+    if(right_elbow is not None or left_elbow is not None):
+        rep_count, current_phase = tricep_dips.update({'right_elbow': right_elbow, 'left_elbow': left_elbow})
+        cv2.putText(image_with_landmarks, f'Phase: {current_phase}', 
+                    (50, 180),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    1.5,
+                    (255, 255, 0),  # Cyan
+                    2,
+                    cv2.LINE_AA)
+    else:
+        print("angles missing")
+    print(pushup.phase_history)
+    cv2.putText(image_with_landmarks, f'Reps: {tricep_dips.rep_count}', 
                 (50, 100),  # Position (x, y)
                 cv2.FONT_HERSHEY_SIMPLEX,  # Font
                 2,  # Font scale
