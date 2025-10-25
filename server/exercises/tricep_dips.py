@@ -1,4 +1,5 @@
 from exercise import *
+from utils.landmarks_utils import calculate_distance_between_landmakrs
 
 class TricepDips(ExerciseTemplate):
 
@@ -26,3 +27,15 @@ class TricepDips(ExerciseTemplate):
             return ExercisePhase.TRANSITION
         else:
             return ExercisePhase.PEAK
+        
+    def detect_common_mistakes(self, angles):
+        right_shoulder = angles.get("right_shoulder")
+        left_shoulder = angles.get("left_shoulder")
+        distance_threshold = calculate_distance_between_landmakrs(right_shoulder, left_shoulder)
+        right_wrist = angles.get("right_wrist")
+        left_wrist = angles.get("left_wrist")
+        if(calculate_distance_between_landmakrs(right_wrist, left_wrist) > distance_threshold):
+            feedback = "Bring arms closer !"
+        else:
+            feedback = "Good Form"
+        return feedback

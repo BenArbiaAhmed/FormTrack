@@ -36,3 +36,10 @@ def calculate_joint_angle(point1, point2, point3):
     angle_radians = math.atan2(math.sin(angle_radians), math.cos(angle_radians))
     angle_degrees = math.degrees(angle_radians)
     return abs(angle_degrees)
+
+def calculate_distance_between_landmakrs(point1, point2):
+
+    vector = np.array([point1.x - point2.x, point1.y - point2.y, point1.z - point2.z])
+
+    distance = np.linalg.norm(vector)
+    return distance
