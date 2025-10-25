@@ -1,7 +1,7 @@
 import numpy as np
 import math
 
-def get_landmarks_dict(pose_world_landmarks, visibility_threshold=0.5):
+def get_landmarks_dict(pose_world_landmarks, visibility_threshold=0.1):
     landmarks = {}
     
     landmark_names = [

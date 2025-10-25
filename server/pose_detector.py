@@ -21,9 +21,9 @@ class PoseDetector:
     self.options = self.PoseLandmarkerOptions(
         base_options=self.BaseOptions(model_asset_path=self.model_path),
         running_mode=running_mode,  
-        min_pose_detection_confidence=0.7,  
-        min_pose_presence_confidence=0.7,   
-        min_tracking_confidence=0.7        
+        min_pose_detection_confidence=0.5,  
+        min_pose_presence_confidence=0.5,   
+        min_tracking_confidence=0.5        
     )
     self.detector = vision.PoseLandmarker.create_from_options(self.options)
 
