@@ -1,4 +1,3 @@
-import numpy as np
 import cv2
 from pose_detector import PoseDetector
 from utils.landmarks_utils import get_landmarks_dict, calculate_joint_angle
@@ -8,6 +7,7 @@ from exercises.tricep_dips import TricepDips
 from exercise import RepType
 from audio_cues import play_go_lower_sound, play_feedback_sound
 import time
+from typing import Generator
 
 
 cap = cv2.VideoCapture(0)
@@ -33,7 +33,8 @@ show_go_lower_message = False
 message_start_time = 0
 
 
-def main():
+def generate_frames()-> Generator[bytes, None, None]:
+    global last_audio_time, show_go_lower_message, message_start_time, frame_count
     while True:
         ret, frame = cap.read()
         
@@ -42,8 +43,8 @@ def main():
             break
 
         landmarks_dict = {}
-        right_elbow = None
-        left_elbow = None
+        right_knee = None 
+        left_knee = None   
 
         timestamp_ms = int(frame_count * 1000 / fps)
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -198,14 +199,18 @@ def main():
 
         #     print(pushup.phase_history)
             
-        cv2.imshow('frame', image_with_landmarks)
+        # cv2.imshow('frame', image_with_landmarks)
+        # Encode frame as JPEG
+        ret, buffer = cv2.imencode('.jpg', image_with_landmarks)
+        frame_bytes = buffer.tobytes()
         
+        # Yield frame in multipart format
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
         frame_count += 1
         
-        if cv2.waitKey(1) == ord('q'):
-            break
+        # if cv2.waitKey(1) == ord('q'):
+        #     break
 
-    cap.release()
-    cv2.destroyAllWindows()
-
-main()
+    # cap.release()
+    # cv2.destroyAllWindows()
