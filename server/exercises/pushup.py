@@ -45,7 +45,7 @@ class Pushup(ExerciseTemplate):
         if right_shoulder and left_shoulder and right_wrist and left_wrist:
             distance_threshold = calculate_distance_between_landmakrs(right_shoulder, left_shoulder)
             if calculate_distance_between_landmakrs(right_wrist, left_wrist) > distance_threshold * 1.5:
-                feedback += "Bring arms closer !\n"
+                feedback += "Bring arms closer !"
         
         # Check back alignment
         visible_shoulders = [s for s in [right_shoulder, left_shoulder] if s is not None]
@@ -53,7 +53,7 @@ class Pushup(ExerciseTemplate):
         visible_knees = [k for k in [right_knee, left_knee] if k is not None]
         
         if not visible_shoulders or not visible_hips or not visible_knees:
-            return feedback if feedback else "Good Form"
+            return feedback if feedback else ""
         
         if len(visible_shoulders) == 1:
             active_shoulder = visible_shoulders[0]
@@ -72,8 +72,5 @@ class Pushup(ExerciseTemplate):
         
         back_angle = calculate_joint_angle(active_shoulder, active_hip, active_knee)
         if back_angle < 150:
-            feedback += "Straighten Back !"
-        
-        if feedback == "":
-            feedback = "Good Form"
+            feedback += "Straighten back !"
         return feedback

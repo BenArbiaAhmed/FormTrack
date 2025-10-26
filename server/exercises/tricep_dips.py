@@ -34,8 +34,7 @@ class TricepDips(ExerciseTemplate):
         distance_threshold = calculate_distance_between_landmakrs(right_shoulder, left_shoulder)
         right_wrist = angles.get("right_wrist")
         left_wrist = angles.get("left_wrist")
+        feedback=""
         if(calculate_distance_between_landmakrs(right_wrist, left_wrist) > distance_threshold):
-            feedback = "Bring arms closer !"
-        else:
-            feedback = "Good Form"
+            feedback = "Bring arms closer !\n"
         return feedback

@@ -1,6 +1,7 @@
 from enum import Enum
 from collections import deque
 from typing import Dict, Tuple, Optional
+import time
 
 class ExercisePhase(Enum):
     """Phases for exercise state machine"""
@@ -23,6 +24,9 @@ class ExerciseTemplate:
         self.last_rep_type = None
         self.rep_count = 0
         self.phase_history = deque(maxlen=5)
+        self.phase_start_time = time.time()
+        self.min_phase_duration = 0.3
+        self.pending_phase = None
     
     def check_phase(self, angles: Dict[str, float]) -> ExercisePhase:
         pass
@@ -30,17 +34,29 @@ class ExerciseTemplate:
     def detect_common_mistakes(self, angles: Dict[str, float]) -> str:
         pass
     
-    def update(self, angles: Dict[str, float]) -> Tuple[int, int, ExercisePhase, RepType]:
-        """Update state machine and return full reps, partial reps, current phase, and rep type"""
+    def update(self, angles: Dict[str, float]) -> Tuple[int, ExercisePhase, RepType]:
+        """Update state machine with smoothing and return rep count, current phase, and rep type"""
         current_phase = self.check_phase(angles)
-        rep_type = RepType.NONE
+        current_time = time.time()
         
         if current_phase is not None and current_phase != self.last_phase:
-            self.phase_history.append(current_phase)
-            self.last_phase = current_phase 
-            rep_type = self.updateRepCount()
+            if self.pending_phase != current_phase:
+                self.pending_phase = current_phase
+                self.phase_start_time = current_time
+                return self.rep_count, self.last_phase, RepType.NONE
             
-        return self.rep_count, current_phase, rep_type
+            if current_time - self.phase_start_time >= self.min_phase_duration:
+                self.phase_history.append(current_phase)
+                self.last_phase = current_phase
+                rep_type = self.updateRepCount()
+                self.pending_phase = None
+                
+                return self.rep_count, current_phase, rep_type
+        else:
+            self.pending_phase = None
+            self.phase_start_time = current_time
+        
+        return self.rep_count, self.last_phase, RepType.NONE
 
     def updateRepCount(self) -> RepType:
         """Check for full or partial reps"""
