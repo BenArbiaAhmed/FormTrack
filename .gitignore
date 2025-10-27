@@ -6,3 +6,6 @@ pyvenv.cfg
 etc/
 *.pyc
 .env
+server/__pycache__/
+server/exercises/__pycache__/
+server/utils/__pycache__/

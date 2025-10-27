@@ -13,7 +13,7 @@ from typing import Generator
 cap = cv2.VideoCapture(0)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
-my_pose_detector = PoseDetector('model/pose_landmarker_full.task')
+my_pose_detector = PoseDetector('landmarker/pose_landmarker_full.task')
 if not cap.isOpened():
     print("Cannot open camera")
     exit()
