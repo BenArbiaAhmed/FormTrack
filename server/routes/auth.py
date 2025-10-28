@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
 import jwt
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import Depends, APIRouter, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jwt.exceptions import InvalidTokenError
 from pwdlib import PasswordHash
@@ -29,6 +29,10 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
+class Response(BaseModel):
+    username: str
+    token: Token
+
 
 class TokenData(BaseModel):
     username: str | None = None
@@ -46,7 +50,7 @@ password_hash = PasswordHash.recommended()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
-app = FastAPI()
+auth_router = APIRouter()
 
 
 def verify_password(plain_password, hashed_password):
@@ -120,10 +124,10 @@ async def get_current_active_user(
     return current_user
 
 
-@app.post("/login")
+@auth_router.post("/login")
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],db: Session = Depends(get_db)
-) -> Token:
+) -> Response:
     user = authenticate_user(form_data.username, form_data.password, db=db)
     if not user:
         raise HTTPException(
@@ -135,12 +139,12 @@ async def login_for_access_token(
     access_token = create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
-    return Token(access_token=access_token, token_type="bearer")
+    return {"username": user.username, "token":Token(access_token=access_token, token_type="bearer")}
 
-@app.post("/signup")
+@auth_router.post("/signup")
 async def signup_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends(), ], db: Session = Depends(get_db)
-) -> Token:
+) -> Response:
     if not(form_data.username and form_data.password):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -163,19 +167,19 @@ async def signup_for_access_token(
     access_token = create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
-    return Token(access_token=access_token, token_type="bearer")
+    return {"username": user.username, "token":Token(access_token=access_token, token_type="bearer")}
 
 
 
 
-@app.get("/users/me/", response_model=UserAccount)
-async def read_users_me(
+@auth_router.get("/checkAuth", response_model=UserAccount)
+async def checkAuth(
     current_user: Annotated[UserAccount, Depends(get_current_active_user)],
 ):
     return current_user
 
 
-@app.get("/users/me/items/")
+@auth_router.get("/users/me/items/")
 async def read_own_items(
     current_user: Annotated[UserAccount, Depends(get_current_active_user)],
 ):

@@ -13,7 +13,7 @@ from typing import Generator
 cap = cv2.VideoCapture(0)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
-my_pose_detector = PoseDetector('landmarker/pose_landmarker_full.task')
+my_pose_detector = None
 if not cap.isOpened():
     print("Cannot open camera")
     exit()
@@ -35,6 +35,7 @@ message_start_time = 0
 
 def generate_frames()-> Generator[bytes, None, None]:
     global last_audio_time, show_go_lower_message, message_start_time, frame_count
+    my_pose_detector = PoseDetector('landmarker/pose_landmarker_full.task')
     while True:
         ret, frame = cap.read()
         
