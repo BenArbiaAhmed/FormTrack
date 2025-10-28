@@ -22,11 +22,9 @@ class DatabaseEngine:
     def SessionLocal(self):
         return self._SessionLocal
 
-# Initialize singleton
-db_engine = DatabaseEngine()
 
-# Dependency function for FastAPI
 def get_db() -> Generator[Session, None, None]:
+    db_engine = DatabaseEngine()
     db = db_engine.SessionLocal()
     try:
         yield db
