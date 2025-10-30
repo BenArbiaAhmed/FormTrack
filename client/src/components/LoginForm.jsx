@@ -43,7 +43,7 @@ export function LoginForm({ onSubmit, className, ...props }) {
                 <Input
                   id="username"
                   type="text"
-                  placeholder="salah"
+                  placeholder="Flen Ben Foulen"
                   required
                   value={username}
                   onChange={(e)=>setUsername(e.target.value)}
@@ -59,7 +59,7 @@ export function LoginForm({ onSubmit, className, ...props }) {
                     Forgot your password?
                   </a>
                 </div>
-                <Input id="password" type="password" required value={password} onChange={(e)=>setPassword(e.target.value)} />
+                <Input id="password" type="password" required value={password} onChange={(e)=>setPassword(e.target.value)} placeholder="***********" />
               </Field>
               <Field>
                 <Button type="submit">Login</Button>
@@ -67,7 +67,7 @@ export function LoginForm({ onSubmit, className, ...props }) {
                   Login with Google
                 </Button>
                 <FieldDescription className="text-center">
-                  Don&apos;t have an account? <a href="#">Sign up</a>
+                  Don&apos;t have an account? <a href="/signup">Sign up</a>
                 </FieldDescription>
               </Field>
             </FieldGroup>

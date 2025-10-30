@@ -29,9 +29,6 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
-class Response(BaseModel):
-    username: str
-    token: Token
 
 
 class TokenData(BaseModel):
@@ -39,7 +36,16 @@ class TokenData(BaseModel):
 
 
 class UserAccount(BaseModel):
+    id: int
     username: str
+    
+    class Config:
+        from_attributes = True
+
+
+class AuthResponse(BaseModel):
+    user: UserAccount
+    token: Token
 
 
 class UserInDB(UserAccount):
@@ -67,7 +73,15 @@ def get_user(username: str, db: Session):
     user = result.scalar_one_or_none()
     
     if user:
+        # # Debug: Check what attributes are available
+        # print(f"User attributes: {user.__dict__}")
+        
+        # # Ensure we have an id
+        # if not hasattr(user, 'id') or user.id is None:
+        #     print(f"WARNING: User {username} has no id!")
+        #     return None
         return UserInDB(
+            id=user.id,
             username=user.username,
             hashed_password=user.password,
         )
@@ -96,7 +110,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     return encoded_jwt
 
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -110,7 +124,7 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         token_data = TokenData(username=username)
     except InvalidTokenError:
         raise credentials_exception
-    user = get_user(username=token_data.username)
+    user = get_user(username=token_data.username, db=db)
     if user is None:
         raise credentials_exception
     return user
@@ -119,15 +133,16 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
 async def get_current_active_user(
     current_user: Annotated[UserAccount, Depends(get_current_user)],
 ):
-    if current_user.disabled:
-        raise HTTPException(status_code=400, detail="Inactive user")
+    # if current_user.disabled:
+    #     raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
 
 
-@auth_router.post("/login")
+@auth_router.post("/login", response_model=AuthResponse)
 async def login_for_access_token(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],db: Session = Depends(get_db)
-) -> Response:
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    db: Session = Depends(get_db)
+)-> AuthResponse:
     user = authenticate_user(form_data.username, form_data.password, db=db)
     if not user:
         raise HTTPException(
@@ -135,39 +150,66 @@ async def login_for_access_token(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
-    return {"username": user.username, "token":Token(access_token=access_token, token_type="bearer")}
+    
+    db_user = db.execute(select(User).where(User.username == user.username)).scalar_one()
+    
+    return {
+        "user": {
+            "id": db_user.id,
+            "username": db_user.username
+        },
+        "token": {
+            "access_token": access_token,
+            "token_type": "bearer"
+        }
+    }
 
-@auth_router.post("/signup")
+@auth_router.post("/signup", response_model=AuthResponse)
 async def signup_for_access_token(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends(), ], db: Session = Depends(get_db)
-) -> Response:
-    if not(form_data.username and form_data.password):
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    db: Session = Depends(get_db)
+)-> AuthResponse:
+    if not (form_data.username and form_data.password):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Missing credentials"
         )
+    
     user = get_user(form_data.username, db)
-    if(user):
+    if user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Username already in use, Choose another one !",
+            detail="Username already in use, Choose another one!",
         )
-    user = User(
+    
+    new_user = User(
         username=form_data.username,
         password=get_password_hash(form_data.password)
     )
-    db.add(user)
+    db.add(new_user)
     db.commit()
-
+    db.refresh(new_user) 
+    
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
+        data={"sub": new_user.username}, expires_delta=access_token_expires
     )
-    return {"username": user.username, "token":Token(access_token=access_token, token_type="bearer")}
+    
+    return {
+        "user": {
+            "id": new_user.id,
+            "username": new_user.username
+        },
+        "token": {
+            "access_token": access_token,
+            "token_type": "bearer"
+        }
+    }
 
 
 
@@ -177,10 +219,3 @@ async def checkAuth(
     current_user: Annotated[UserAccount, Depends(get_current_active_user)],
 ):
     return current_user
-
-
-@auth_router.get("/users/me/items/")
-async def read_own_items(
-    current_user: Annotated[UserAccount, Depends(get_current_active_user)],
-):
-    return [{"item_id": "Foo", "owner": current_user.username}]

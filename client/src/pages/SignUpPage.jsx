@@ -11,16 +11,20 @@ export default function SignUpPage() {
             method: 'POST',
             body: formData
           });
-          const json_response = response.json()
-          const token = json_response["token"]
-          const username = json_response["username"]
-          signup(token, username)
+          if(response.ok){
+            const json_response = await response.json()
+            const token = json_response.token.access_token
+            const user = json_response["user"]
+            signup(token, user)
+          }
         } catch (error) {
           console.error(error);
         }
       };
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+    <div 
+      className="flex min-h-svh w-full items-center justify-center p-6 md:p-10 bg-cover  bg-no-repeat bg-[url(/images/background.jpg)]" 
+    >
       <div className="w-full max-w-sm">
         <SignupForm onSubmit={handleSignup} />
       </div>

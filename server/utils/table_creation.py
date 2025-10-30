@@ -10,6 +10,8 @@ def create_tables():
     
     engine = create_engine("sqlite:///server/data/mydatabase.db", echo=True)
     
+    # Base.metadata.drop_all(engine)
+    
     Base.metadata.create_all(engine)
 
 if __name__ == "__main__":

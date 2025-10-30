@@ -41,7 +41,7 @@ export function SignupForm({ onSubmit, ...props }) {
               <Input
                 id="username"
                 type="text"
-                placeholder="salah"
+                placeholder="Flen Ben Foulen"
                 required
                 value={username}
                 onChange={(e)=>setUsername(e.target.value)}
@@ -49,7 +49,7 @@ export function SignupForm({ onSubmit, ...props }) {
             </Field>
             <Field>
               <FieldLabel htmlFor="password">Password</FieldLabel>
-              <Input id="password" type="password" required value={password} onChange={(e)=>setPassword(e.target.value)}/>
+              <Input id="password" type="password" required value={password} onChange={(e)=>setPassword(e.target.value)} placeholder="**************"/>
               <FieldDescription>
                 Must be at least 8 characters long.
               </FieldDescription>
@@ -61,7 +61,7 @@ export function SignupForm({ onSubmit, ...props }) {
                   Sign up with Google
                 </Button>
                 <FieldDescription className="px-6 text-center">
-                  Already have an account? <a href="#">Sign in</a>
+                  Already have an account? <a href="/login">Sign in</a>
                 </FieldDescription>
               </Field>
             </FieldGroup>
