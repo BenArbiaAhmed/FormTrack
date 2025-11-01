@@ -7,6 +7,7 @@ from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
 from server.models.base_model import Base
+from datetime import datetime
 
 class Workout(Base):
     __tablename__ = "workout"
@@ -17,3 +18,4 @@ class Workout(Base):
     )
     user_id: Mapped[int] = mapped_column(ForeignKey("user_account.id"))
     user: Mapped["User"] = relationship(back_populates="workouts")
+    started_at: Mapped[datetime] = mapped_column(nullable=False)

@@ -4,9 +4,11 @@ from fastapi.responses import HTMLResponse
 from fastapi.responses import StreamingResponse
 from main import generate_frames
 from server.routes.auth import auth_router
+from server.routes.workouts import workout_router
 
 app = FastAPI()
 app.include_router(auth_router)
+app.include_router(workout_router)
 
 app.add_middleware(
     CORSMiddleware,

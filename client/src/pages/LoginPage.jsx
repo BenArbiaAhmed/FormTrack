@@ -1,8 +1,8 @@
 import { LoginForm } from "../components/LoginForm";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router";
 export default function LoginPage() {
-
-
+    let navigate = useNavigate();
     const { login } = useAuth();
     const handleLogin = async (formData) => {
     console.log('Login data:', formData);
@@ -11,11 +11,13 @@ export default function LoginPage() {
         method: 'POST',
         body: formData
       });
-      
-      const json_response = await response.json()
-      const token = json_response.token.access_token
-      const user = json_response.user
-      login(token, user)
+      if(response.ok){
+        const json_response = await response.json()
+        const token = json_response.token.access_token
+        const user = json_response.user
+        login(token, user)
+        navigate("/")
+      }
     } catch (error) {
       console.error(error);
     }
