@@ -29,3 +29,12 @@ class Exercise(Base):
     duration: Mapped[int] = mapped_column(nullable=False)
     repetitions: Mapped[int] = mapped_column(nullable=False)
     partial_reps: Mapped[Optional[int]] = mapped_column(nullable=True)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name.value,
+            'duration': self.duration,
+            'repetitions': self.repetitions,
+            'partial_reps': self.partial_reps
+        }

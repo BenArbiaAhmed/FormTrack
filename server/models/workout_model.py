@@ -19,3 +19,14 @@ class Workout(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("user_account.id"))
     user: Mapped["User"] = relationship(back_populates="workouts")
     started_at: Mapped[datetime] = mapped_column(nullable=False)
+
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'duration': self.duration,
+            'exercises': [
+                exercise.to_dict() for exercise in self.exercises
+            ],
+            'started_at': self.started_at.isoformat()
+        }
