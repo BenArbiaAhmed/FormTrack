@@ -7,6 +7,7 @@ import SignUpPage from './pages/SignUpPage';
 import ProtectedRoute from './pages/ProtectedRoute';
 import Dashboard from './pages/Dashboard';
 import WorkoutsPage from './pages/WorkoutsPage';
+import NewWorout from './pages/NewWorkout'
 
 
 const root = document.getElementById("root");
@@ -20,6 +21,9 @@ ReactDOM.createRoot(root).render(
               </ProtectedRoute>} />
           <Route path="/workouts" element={<ProtectedRoute>
                 <WorkoutsPage />
+              </ProtectedRoute>} />
+          <Route path="/newworkout" element={<ProtectedRoute>
+                <NewWorout />
               </ProtectedRoute>} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignUpPage />} />

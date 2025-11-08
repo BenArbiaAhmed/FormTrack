@@ -5,6 +5,7 @@ from fastapi.responses import StreamingResponse
 from main import generate_frames
 from server.routes.auth import auth_router
 from server.routes.workouts import workout_router
+from server.schemas.workout_schemas import ExerciseName
 
 app = FastAPI()
 app.include_router(auth_router)
@@ -20,8 +21,8 @@ app.add_middleware(
 
 
 
-@app.get("/video")
-def video_feed():
+@app.get("/video/{current_exercise}")
+def video_feed(current_exercise: ExerciseName):
     return StreamingResponse(
         generate_frames(),
         media_type="multipart/x-mixed-replace; boundary=frame"

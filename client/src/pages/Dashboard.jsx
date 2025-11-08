@@ -8,10 +8,9 @@ import {
   SidebarProvider,
 } from "@/components/ui/sidebar"
 import axios from '../axios/axiosInstance'
-import data from "../lib/data.json"
 import { useEffect, useState } from "react"
 
-export default function Page() {
+export default function Dashboard() {
   const [fetchedWorkoutsData, setFetchedWorkoutsData] = useState([])
 
   async function getDashboardData() {

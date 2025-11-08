@@ -1,7 +1,7 @@
 "use client"
 
 import { IconCirclePlusFilled, IconMail } from "@tabler/icons-react"
-
+import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { NavLink } from "react-router-dom"
 import {
@@ -25,16 +25,10 @@ export function NavMain({
               className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
             >
               <IconCirclePlusFilled />
-              <span>Start new workout</span>
+              <Link to="/newworkout">
+                <span>Start new workout</span>
+              </Link>
             </SidebarMenuButton>
-            {/* <Button
-              size="icon"
-              className="size-8 group-data-[collapsible=icon]:opacity-0"
-              variant="outline"
-            >
-              <IconCirclePlusFilled />
-              <span className="sr-only">Inbox</span>
-            </Button> */}
           </SidebarMenuItem>
         </SidebarMenu>
         <SidebarMenu>
