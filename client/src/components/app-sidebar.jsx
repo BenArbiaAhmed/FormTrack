@@ -50,11 +50,11 @@ const data = {
       url: "#",
       icon: IconListDetails,
     },
-    {
-      title: "Analytics",
-      url: "#",
-      icon: IconChartBar,
-    },
+    // {
+    //   title: "Analytics",
+    //   url: "#",
+    //   icon: IconChartBar,
+    // },
     // {
     //   title: "Projects",
     //   url: "#",

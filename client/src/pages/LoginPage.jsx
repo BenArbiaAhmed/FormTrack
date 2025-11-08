@@ -16,7 +16,7 @@ export default function LoginPage() {
         const token = json_response.token.access_token
         const user = json_response.user
         login(token, user)
-        navigate("/")
+        navigate("/dashboard")
       }
     } catch (error) {
       console.error(error);

@@ -15,6 +15,7 @@ from server.models.user_model import User
 from server.models.workout_model import Workout
 from server.models.exercise_model import Exercise
 import os
+from server.schemas.auth_schemas import *
 
 load_dotenv()
 
@@ -24,32 +25,6 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7
 
 
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-
-
-class TokenData(BaseModel):
-    username: str | None = None
-
-
-class UserAccount(BaseModel):
-    id: int
-    username: str
-    
-    class Config:
-        from_attributes = True
-
-
-class AuthResponse(BaseModel):
-    user: UserAccount
-    token: Token
-
-
-class UserInDB(UserAccount):
-    hashed_password: str
 
 
 password_hash = PasswordHash.recommended()

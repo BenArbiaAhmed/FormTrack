@@ -1,6 +1,6 @@
 import { AppSidebar } from "@/components/app-sidebar"
 import { ChartAreaInteractive } from "@/components/chart-area-interactive"
-import { DataTable } from "@/components/data-table"
+// import { DataTable } from "@/components/data-table"
 import { SectionCards } from "@/components/section-cards"
 import { SiteHeader } from "@/components/site-header"
 import {
@@ -8,16 +8,16 @@ import {
   SidebarProvider,
 } from "@/components/ui/sidebar"
 import axios from '../axios/axiosInstance'
-import data from "../lib/data.json"
 import { useEffect, useState } from "react"
+import DataTable from "../components/table"
 
-export default function Page() {
+export default function WorkoutsPage() {
   const [fetchedWorkoutsData, setFetchedWorkoutsData] = useState([])
 
   async function getDashboardData() {
     try {
         const response = await axios.get('/workout');
-        const workoutsData = response.data;  
+        const workoutsData = response.data;
         setFetchedWorkoutsData(workoutsData); 
       } catch (error) {
         console.error(error);
@@ -42,12 +42,13 @@ export default function Page() {
         <SiteHeader />
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
-            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-              <SectionCards fetchedData={fetchedWorkoutsData}  />
+            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-4">
+              {/* <SectionCards fetchedData={fetchedWorkoutsData}  />
               <div className="px-4 lg:px-6">
                 <ChartAreaInteractive fetchedData={fetchedWorkoutsData}  />
-              </div>
+              </div> */}
               {/* <DataTable data={fetchedWorkoutsData} /> */}
+              <DataTable fetchedData={fetchedWorkoutsData}  />
             </div>
           </div>
         </div>

@@ -3,6 +3,7 @@
 import { IconCirclePlusFilled, IconMail } from "@tabler/icons-react"
 
 import { Button } from "@/components/ui/button"
+import { NavLink } from "react-router-dom"
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -26,23 +27,33 @@ export function NavMain({
               <IconCirclePlusFilled />
               <span>Start new workout</span>
             </SidebarMenuButton>
-            <Button
+            {/* <Button
               size="icon"
               className="size-8 group-data-[collapsible=icon]:opacity-0"
               variant="outline"
             >
               <IconCirclePlusFilled />
               <span className="sr-only">Inbox</span>
-            </Button>
+            </Button> */}
           </SidebarMenuItem>
         </SidebarMenu>
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton tooltip={item.title}>
-                {item.icon && <item.icon />}
-                <span>{item.title}</span>
-              </SidebarMenuButton>
+              <NavLink
+                to={`/${item.title.toLowerCase()}`}
+                className={({ isActive, isPending }) =>
+                  isPending ? "pending" : isActive ? "text-red-500" : ""
+                }
+              >
+                {({ isActive, isPending }) => (
+                  <SidebarMenuButton tooltip={item.title} isActive={isActive} className="data-[active=true]:bg-gray-300" >
+                    {item.icon && <item.icon />}
+                    <span>{item.title}</span>
+                  </SidebarMenuButton>
+                )}
+              </NavLink>
+              
             </SidebarMenuItem>
           ))}
         </SidebarMenu>

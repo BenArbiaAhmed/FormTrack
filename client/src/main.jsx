@@ -6,6 +6,8 @@ import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
 import ProtectedRoute from './pages/ProtectedRoute';
 import Dashboard from './pages/Dashboard';
+import WorkoutsPage from './pages/WorkoutsPage';
+
 
 const root = document.getElementById("root");
 
@@ -13,8 +15,11 @@ ReactDOM.createRoot(root).render(
   <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<ProtectedRoute>
+          <Route path="/dashboard" element={<ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>} />
+          <Route path="/workouts" element={<ProtectedRoute>
+                <WorkoutsPage />
               </ProtectedRoute>} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignUpPage />} />

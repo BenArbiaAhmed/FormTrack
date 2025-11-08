@@ -10,41 +10,11 @@ from sqlalchemy.orm import Session
 from server.routes.auth import get_current_active_user, UserAccount
 from typing import Annotated, List
 from sqlalchemy import select
+from server.schemas.workout_schemas import WorkoutCreate, ExerciseResponse, WorkoutResponse, ExcerciceCreate
+from server.utils.workout_utils import calculate_calories_burned
 
 workout_router = APIRouter()
 
-
-class ExerciseName(str, Enum):
-    squat = 'squat'
-    pushup = 'pushup'
-    tricep_dip = 'tricep_dip'
-
-
-class ExcerciceCreate(BaseModel):
-    name: ExerciseName
-    duration: int
-    repetitions: int
-    partial_reps: int
-
-class WorkoutCreate(BaseModel):
-    started_at: datetime
-    duration: int
-    exercises: list[ExcerciceCreate]
-
-class ExerciseResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-    id: int
-    name: ExerciseName
-    duration: int
-    repetitions: int
-    partial_reps: int
-
-class WorkoutResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-    id: int
-    duration: int
-    started_at: datetime
-    exercises: list[ExerciseResponse]
     
     
 @workout_router.post("/workout/new", response_model=WorkoutResponse, status_code=status.HTTP_201_CREATED)
@@ -67,6 +37,7 @@ async def save_new_workout(workout: WorkoutCreate,
             partial_reps=exercise.partial_reps
         )
         new_workout.exercises.append(new_exercise)
+    new_workout.calories_burned = calculate_calories_burned(workout)
     
     db.add(new_workout)
     db.commit()
