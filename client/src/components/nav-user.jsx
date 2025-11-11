@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/sidebar"
 
 export function NavUser({
-  user,
+  user, handleLogout
 }) {
   const { isMobile } = useSidebar()
 
@@ -92,7 +92,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
               <IconLogout />
               Log out
             </DropdownMenuItem>

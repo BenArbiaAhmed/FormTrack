@@ -19,6 +19,8 @@ import {
   IconUsers,
 } from "@tabler/icons-react"
 
+import { useAuth } from "@/context/AuthContext";
+
 import { NavDocuments } from "../components/nav-documents"
 import { NavMain } from "../components/nav-main"
 import { NavSecondary } from "../components/nav-secondary"
@@ -151,6 +153,12 @@ const data = {
 }
 
 export function AppSidebar({ ...props }) {
+  const { logout, user } = useAuth();
+  const connectedUser= {
+    name: user.username ,
+    email: `${user.username}@mail.com`,
+    avatar: "/avatars/shadcn.jpg",
+  }
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -174,7 +182,7 @@ export function AppSidebar({ ...props }) {
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={connectedUser} handleLogout={logout} />
       </SidebarFooter>
     </Sidebar>
   )

@@ -9,9 +9,15 @@ from audio_cues import play_go_lower_sound, play_feedback_sound
 import time
 from typing import Generator
 from pathlib import Path
+from server.services.squat_logic import process_squat
+from server.services.pushup_logic import process_pushup
+from server.services.tricep_dips_logic import process_tricep_dips
+from typing import Dict
+import threading
+from services.session import SessionManager
+import asyncio
 
 
-squat = Squat()
 pushup = Pushup()
 tricep_dips = TricepDips()
 
@@ -20,10 +26,17 @@ audio_cooldown = 4
 show_go_lower_message = False
 message_start_time = 0
 
+def get_session_manager():
+    from server.api import session_manager
+    return session_manager
 
-def generate_frames()-> Generator[bytes, None, None]:
+def generate_frames(exercise_name, session_id, session_manager: SessionManager)-> Generator[bytes, None, None]:
     global last_audio_time, show_go_lower_message, message_start_time, frame_count
-
+    # session_manager = get_session_manager()
+    session = session_manager.get_session(session_id)
+    if not session:
+        print(f"Session {session_id} not found")
+        return
     cap = cv2.VideoCapture(0)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
@@ -38,16 +51,14 @@ def generate_frames()-> Generator[bytes, None, None]:
     frame_count = 0
     my_pose_detector = PoseDetector('server/landmarker/pose_landmarker_full.task')
     try:
-        while True:
+        while session.active:
             ret, frame = cap.read()
             
             if not ret:
                 print("Can't receive frame (stream end?). Exiting ...")
                 break
 
-            landmarks_dict = {}
-            right_knee = None 
-            left_knee = None   
+            landmarks_dict = {} 
 
             timestamp_ms = int(frame_count * 1000 / fps)
             rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -58,60 +69,50 @@ def generate_frames()-> Generator[bytes, None, None]:
             if landmarks.pose_world_landmarks:
                 pose_world_landmarks = landmarks.pose_world_landmarks[0]
                 landmarks_dict = get_landmarks_dict(pose_world_landmarks)
+            feedback=""
+            with session.lock:
+                if exercise_name == "squat":
+                    session.exercise, feedback = process_squat(landmarks_dict, session.exercise)
+                elif exercise_name == 'pushup':
+                    session.exercise, feedback = process_pushup(landmarks_dict, session.exercise)
+                elif exercise_name == 'tricep_dip':
+                    session.exercise, feedback = process_tricep_dips(landmarks_dict, session.exercise)
 
-            if landmarks_dict.get('right_hip') and landmarks_dict.get('right_knee') and landmarks_dict.get('right_ankle'):
-                right_knee = calculate_joint_angle(landmarks_dict['right_hip'], landmarks_dict['right_knee'], landmarks_dict['right_ankle'])
-            if landmarks_dict.get('left_hip') and landmarks_dict.get('left_knee') and landmarks_dict.get('left_ankle'):
-                left_knee = calculate_joint_angle(landmarks_dict['left_hip'], landmarks_dict['left_knee'], landmarks_dict['left_ankle'])
+            cv2.putText(image_with_landmarks, f'Phase: {session.exercise.check_phase}', 
+                    (600, 600),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    2,
+                    (0, 255, 0),
+                    3,
+                    cv2.LINE_AA)
 
-            if(right_knee is not None or left_knee is not None):
-                if landmarks_dict.get('right_shoulder') and landmarks_dict.get('left_shoulder') and landmarks_dict.get("right_ankle") and landmarks_dict.get("left_ankle"):
-                    right_shoulder = landmarks_dict.get('right_shoulder')
-                    left_shoulder = landmarks_dict.get('left_shoulder')
-                    right_ankle = landmarks_dict.get("right_ankle")
-                    left_ankle = landmarks_dict.get("left_ankle")
-                    
-                    feedback = squat.detect_common_mistakes({
-                        'right_shoulder': right_shoulder, 
-                        'left_shoulder': left_shoulder,
-                        'right_ankle': right_ankle,
-                        'left_ankle': left_ankle
-                    })
-                    
-                    if(feedback):
-                        print(feedback)
-                        play_feedback_sound(feedback)
-                        cv2.putText(image_with_landmarks, f'{feedback}',
-                            (50, 250),  
-                            cv2.FONT_HERSHEY_SIMPLEX,
-                            1.2,
-                            (0, 255, 255),
-                            2,
-                            cv2.LINE_AA)
-                else:
-                    print("Missing landmarks for form check")
+            if(feedback):
+                cv2.putText(image_with_landmarks, f'{feedback}',
+                    (50, 250),  
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    1.2,
+                    (0, 255, 255),
+                    2,
+                    cv2.LINE_AA)
+        
+            cv2.putText(image_with_landmarks, f'Reps: {session.exercise.rep_count}', 
+                    (50, 100),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    2,
+                    (0, 255, 0),
+                    3,
+                    cv2.LINE_AA)
                 
-                rep_count, current_phase, rep_type = squat.update({'right_knee': right_knee, 'left_knee': left_knee})
-                
-                cv2.putText(image_with_landmarks, f'Reps: {squat.rep_count}', 
-                        (50, 100),
-                        cv2.FONT_HERSHEY_SIMPLEX,
-                        2,
-                        (0, 255, 0),
-                        3,
-                        cv2.LINE_AA)
-                
-                if squat.last_rep_type == RepType.PARTIAL:
-                    current_time = time.time()
+            if session.exercise.last_rep_type == RepType.PARTIAL:
+                current_time = time.time()
 
-                    # Only play audio if enough time has passed
-                    if current_time - last_audio_time > audio_cooldown:
-                        play_go_lower_sound()
-                        last_audio_time = current_time
-                        show_go_lower_message = True
-                        message_start_time = current_time
-                    
-                    squat.last_rep_type = None
+                if current_time - last_audio_time > audio_cooldown:
+                    play_go_lower_sound()
+                    last_audio_time = current_time
+                    show_go_lower_message = True
+                    message_start_time = current_time
+                
+                session.exercise.last_rep_type = None
                 
                 if show_go_lower_message:
                     if time.time() - message_start_time < 2:
@@ -125,14 +126,37 @@ def generate_frames()-> Generator[bytes, None, None]:
                     else:
                         show_go_lower_message = False
 
-                print(squat.phase_history)
+                print(session.exercise.phase_history)
 
             ret, buffer = cv2.imencode('.jpg', image_with_landmarks)
             frame_bytes = buffer.tobytes()
             
-            # Yield frame in multipart format
             yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
             frame_count += 1
     finally:
         cap.release()
+    
+async def generate_rep_counts(session_id: str, session_manager: SessionManager):
+    # session_manager = get_session_manager()
+    session = session_manager.get_session(session_id)
+    if not session:
+        yield {"error": "Session not found"}
+        return
+    
+    last_reps = 0
+    last_partial = 0
+    
+    try:
+        while session.active:  # Check if session is still active
+            with session.lock:
+                counts = session.exercise.get_rep_counts()
+            
+            if counts["reps"] != last_reps or counts["partial_reps"] != last_partial:
+                yield counts
+                last_reps = counts["reps"]
+                last_partial = counts["partial_reps"]
+            
+            await asyncio.sleep(0.1)
+    except Exception as e:
+        print(f"Error in rep counts: {e}")

@@ -4,7 +4,7 @@ from utils.landmarks_utils import calculate_distance_between_landmakrs
 class TricepDips(ExerciseTemplate):
 
     def __init__(self):
-        super().__init__(name='tricep_dips', key_angles={'shoulder_elbow_wrist': 110, 'asymmetry': 15, 'extended_arm': 140})
+        super().__init__(name='tricep_dips', key_angles={'shoulder_elbow_wrist': 110, 'asymmetry': 15, 'extended_arm': 150})
 
 
     def check_phase(self, angles):

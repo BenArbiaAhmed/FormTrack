@@ -34,10 +34,13 @@ import {
 
 import axiosInstance from '../axios/axiosInstance'
 
+import toast from "react-hot-toast"
+
 const deleteWorkout = async function(id) {
   try {
     const response = await axiosInstance.delete(`/workout/${id}`);
     console.log(response);
+    toast.success('Successfully deleted workout!')
   } catch (error) {
     console.error(error);
   }

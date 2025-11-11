@@ -23,6 +23,7 @@ class ExerciseTemplate:
         self.last_phase = None
         self.last_rep_type = None
         self.rep_count = 0
+        self.partial_rep_count = 0
         self.phase_history = deque(maxlen=5)
         self.phase_start_time = time.time()
         self.min_phase_duration = 0.3
@@ -74,6 +75,7 @@ class ExerciseTemplate:
             for i in range(len(self.phase_history) - 2):
                 if self._check_sequence([ExercisePhase.START, ExercisePhase.TRANSITION, 
                                         ExercisePhase.START], i):
+                    self.partial_rep_count +=1
                     self.last_rep_type = RepType.PARTIAL
                     for _ in range(2):
                         self.phase_history.popleft()
@@ -91,3 +93,6 @@ class ExerciseTemplate:
             if phase_list[start_idx + i] != phase:
                 return False
         return True
+    
+    def get_rep_counts(self):
+        return {'reps': self.rep_count, 'partial_reps': self.partial_rep_count}

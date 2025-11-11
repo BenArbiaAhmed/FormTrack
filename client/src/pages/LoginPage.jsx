@@ -1,23 +1,20 @@
 import { LoginForm } from "../components/LoginForm";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router";
+import axios from '../axios/axiosInstance'
 export default function LoginPage() {
     let navigate = useNavigate();
     const { login } = useAuth();
     const handleLogin = async (formData) => {
     console.log('Login data:', formData);
     try {
-      const response = await fetch('http://127.0.0.1:8000/login', {
-        method: 'POST',
-        body: formData
-      });
-      if(response.ok){
-        const json_response = await response.json()
-        const token = json_response.token.access_token
-        const user = json_response.user
-        login(token, user)
-        navigate("/dashboard")
-      }
+      const response = await axios.post('/login', formData);  
+      const json_response = response.data
+      const token = json_response.token.access_token
+      const user = json_response.user
+      login(token, user)
+      navigate("/dashboard")
+      
     } catch (error) {
       console.error(error);
     }

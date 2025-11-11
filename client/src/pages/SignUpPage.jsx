@@ -1,22 +1,18 @@
 import { SignupForm } from "@/components/SignUpFrom"
 import { useAuth } from "@/context/AuthContext";
-
+import axios from '../axios/axiosInstance'
 
 export default function SignUpPage() {
     const { signup } = useAuth();
         const handleSignup = async (formData) => {
         console.log('Signup data:', formData);
         try {
-          const response = await fetch('http://127.0.0.1:8000/signup', {
-            method: 'POST',
-            body: formData
-          });
-          if(response.ok){
-            const json_response = await response.json()
-            const token = json_response.token.access_token
-            const user = json_response["user"]
-            signup(token, user)
-          }
+          const response = await axios.post('/signup', formData);    
+          const json_response = response.data
+          const token = json_response.token.access_token
+          const user = json_response["user"]
+          signup(token, user)
+          
         } catch (error) {
           console.error(error);
         }

@@ -11,6 +11,8 @@ import axios from '../axios/axiosInstance'
 import { useEffect, useState } from "react"
 import DataTable from "../components/table"
 
+import { Toaster } from "react-hot-toast"
+
 export default function WorkoutsPage() {
   const [fetchedWorkoutsData, setFetchedWorkoutsData] = useState([])
 
@@ -29,6 +31,9 @@ export default function WorkoutsPage() {
   }, [])
   
   return (
+    <>
+    <div><Toaster/></div>
+    
     <SidebarProvider
       style={
         {
@@ -54,5 +59,6 @@ export default function WorkoutsPage() {
         </div>
       </SidebarInset>
     </SidebarProvider>
+    </>
   )
 }
