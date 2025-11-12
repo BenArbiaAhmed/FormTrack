@@ -1,11 +1,5 @@
-Include/
-Lib/
-Scripts/
-share/
-pyvenv.cfg
-etc/
-*.pyc
+.env.example
+.vscode/
 .env
-server/__pycache__/
-server/exercises/__pycache__/
-server/utils/__pycache__/
+.venv/
+node_modules/
