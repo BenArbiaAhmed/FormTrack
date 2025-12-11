@@ -347,7 +347,7 @@ Ahmed
 
 ## 📞 Support
 
-For support, email your-email@example.com or open an issue on GitHub.
+For support, open an issue on GitHub.
 
 ---
 
