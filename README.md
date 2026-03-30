@@ -1,4 +1,4 @@
-<img width="1836" height="874" alt="Screenshot from 2026-03-30 23-26-52" src="https://github.com/user-attachments/assets/e667dd46-d9fb-47dc-9bfd-d334f167e858" /># 💪 FormTrack
+# 💪 FormTrack
 
 A modern, intelligent fitness tracking application that uses pose estimation technology to monitor and analyze workout performance in real-time. This application leverages computer vision to detect user movements, count repetitions, and provide detailed workout analytics.
 
