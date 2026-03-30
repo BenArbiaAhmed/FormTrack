@@ -6,6 +6,9 @@ A modern, intelligent fitness tracking application that uses pose estimation tec
 ![React](https://img.shields.io/badge/React-19.2-61DAFB?style=flat-square&logo=react)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.120-009688?style=flat-square)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
+<img width="1836" height="874" alt="Screenshot from 2026-03-30 23-26-36" src="https://github.com/user-attachments/assets/cdc255b5-a620-49d4-b4fb-a32ca87f467a" />
+<img width="1836" height="874" alt="Screenshot from 2026-03-30 23-26-36" src="https://github.com/user-attachments/assets/a988ae6f-02dc-4bc6-98d9-e65aafc09f13" />
+
 
 ## 📋 Table of Contents
 
