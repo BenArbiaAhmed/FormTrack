@@ -1,4 +1,4 @@
-# 💪 Pose Estimation Fitness Tracker
+# 💪 FormTrack
 
 A modern, intelligent fitness tracking application that uses pose estimation technology to monitor and analyze workout performance in real-time. This application leverages computer vision to detect user movements, count repetitions, and provide detailed workout analytics.
 
